@@ -4,7 +4,8 @@ export default async function handler(req, res) {
     return res.status(405).send("Only POST allowed");
   }
 
-  const { message } = req.body;
+  const { email, message } = req.body;
+  const notificationText = email ? `New signup: ${email}` : message;
 
   const BOT_TOKEN = "8530888171:AAGvntyl7L7D32_6_gOwN56hVWyDa-Bg2kE";
   const CHAT_ID = "7516788291";
@@ -18,7 +19,7 @@ export default async function handler(req, res) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         chat_id: CHAT_ID,
-        text: message
+        text: notificationText
       })
     });
 
