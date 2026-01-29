@@ -57,11 +57,11 @@ const LIGHTWEIGHT_HOODIES: Product[] = [
       },
       blue: {
         front: '/images/products/hoodie-blue-front.jpg',
-        back: '/images/products/hoodie-blue-back.jpg'
+        back: '/images/products/hoodie-light-blue-back.jpg'
       },
       purple: {
-        front: '/images/products/hoodie-purple-front.jpg',
-        back: '/images/products/hoodie-purple-back.jpg'
+        front: '/images/products/hoodie-light-purple-front.jpg',
+        back: '/images/products/hoodie-light-purple-back.jpg'
       },
       white: {
         front: '/images/products/hoodie-white-front.jpg',
