@@ -1,0 +1,295 @@
+Here’s the full, clean `app/premium-drop/page.tsx` matching your new plan (hero > product preview > “why” story > founders benefits > email/reserve form), keeping the Telegram hook and hiding prices until after signup. Just paste this into the file:
+
+```tsx app/premium-drop/page.tsx
+'use client';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
+
+const PAYMENT_EMAIL = 'support@brigit.work';
+
+type Product = {
+  id: string;
+  title: string;
+  tag: string;
+  blurb: string;
+  image: string;
+};
+
+const PRODUCTS: Product[] = [
+  {
+    id: 'tee',
+    title: 'Concert Tee',
+    tag: 'Lightweight • Florida heat ready',
+    blurb: 'Breathable weave, matte finish, minimal branding. Built for humid arenas.',
+    image: '/images/tee-mockup.png', // Use your combined mockup here if desired
+  },
+  {
+    id: 'hoodie',
+    title: 'Night Hoodie',
+    tag: 'Heavyweight • Premium feel',
+    blurb: 'Oversized drape, brushed fleece, hidden pocket stitch. After-show uniform.',
+    image: '/images/hoodie-mockup.png',
+  },
+];
+
+const COUNTDOWN_TARGET = new Date('2026-02-14T23:59:59Z');
+
+export default function PremiumDropPage() {
+  const [claimed, setClaimed] = useState(241);
+  const [isAudioOn, setIsAudioOn] = useState(false);
+  const [ambientAudio, setAmbientAudio] = useState<HTMLAudioElement | null>(null);
+  const [email, setEmail] = useState('');
+  const [location, setLocation] = useState('');
+  const [commitment, setCommitment] = useState('Yes, I’m ready to reserve');
+  const [countdown, setCountdown] = useState(getCountdown());
+  const [storyOpen, setStoryOpen] = useState(false);
+
+  const recordEvent = useCallback(async (event: string, payload: Record<string, unknown>) => {
+    try {
+      await fetch('/api/telegram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event, payload }),
+      });
+    } catch (error) {
+      console.error('Failed to notify Telegram', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCountdown(getCountdown()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const jitter = setInterval(() => setClaimed((prev) => prev + (Math.random() > 0.85 ? 1 : 0)), 7000);
+    return () => clearInterval(jitter);
+  }, []);
+
+  useEffect(() => {
+    if (!ambientAudio) {
+      const audio = new Audio('/audio/arena-pad.mp3');
+      audio.loop = true;
+      audio.volume = 0.25;
+      setAmbientAudio(audio);
+      return;
+    }
+    if (isAudioOn) ambientAudio.play().catch(() => setIsAudioOn(false));
+    else ambientAudio.pause();
+  }, [isAudioOn, ambientAudio]);
+
+  const countdownLabel = useMemo(() => {
+    const { days, hours, minutes, seconds } = countdown;
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  }, [countdown]);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!email) return;
+    await recordEvent('founders-signup', { email, location, commitment });
+    alert('You’re on the founders list. Watch your inbox for pricing + proof instructions.');
+    setEmail('');
+    setLocation('');
+  }
+
+  return (
+    <main className="min-h-screen overflow-hidden bg-[#040404] text-white">
+      <GradientHero countdownLabel={countdownLabel} claimed={claimed} onStory={() => setStoryOpen(true)} />
+
+      <section className="mx-auto mt-16 grid max-w-5xl gap-8 px-6 md:grid-cols-2">
+        {PRODUCTS.map((product) => (
+          <article key={product.id} className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition hover:-translate-y-1 hover:border-white/30 hover:bg-white/10">
+            <div className="relative overflow-hidden rounded-2xl bg-black/40">
+              <Image src={product.image} alt={product.title} width={900} height={900} className="h-80 w-full object-cover opacity-90 transition duration-700 hover:scale-105" />
+              <div className="absolute inset-x-6 bottom-4 text-xs uppercase tracking-[0.4em] text-white/70">{product.title}</div>
+            </div>
+            <div className="mt-6 space-y-3">
+              <p className="text-sm text-pink-200/80">{product.tag}</p>
+              <p className="text-sm text-white/70">{product.blurb}</p>
+            </div>
+          </article>
+        ))}
+      </section>
+
+      <section className="mx-auto mt-24 max-w-3xl px-6 text-white/80">
+        <p className="text-sm uppercase tracking-[0.4em] text-white/60">Why this drop exists</p>
+        <div className="mt-4 rounded-3xl border border-white/10 bg-white/5 p-8 text-lg text-white/80 backdrop-blur-2xl">
+          <p>
+            Tampa ARMY deserved something made for the city—not generic tour merch shipped from anywhere else. We built this first micro-run for the fans who showed up early, rehearsed in parking lots,
+            and kept the lightsticks up when it poured. That’s the entire story.
+          </p>
+        </div>
+      </section>
+
+      <section className="mx-auto mt-16 max-w-4xl px-6">
+        <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-transparent p-8 backdrop-blur-2xl">
+          <p className="text-sm uppercase tracking-[0.4em] text-white/60">Founders benefits</p>
+          <ul className="mt-6 grid gap-4 text-sm text-white/80 md:grid-cols-2">
+            <li className="rounded-2xl border border-white/10 px-5 py-4">Priority access to the batch window</li>
+            <li className="rounded-2xl border border-white/10 px-5 py-4">Limited colors exclusive to Tampa drop</li>
+            <li className="rounded-2xl border border-white/10 px-5 py-4">Early production run before public release</li>
+            <li className="rounded-2xl border border-white/10 px-5 py-4">Locked sizing and slot before the wider announcement</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="founders-form" className="mx-auto mt-24 max-w-3xl px-6">
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-white backdrop-blur-2xl">
+          <p className="text-sm uppercase tracking-[0.4em] text-white/60">Join founders list</p>
+          <h3 className="mt-4 text-3xl font-semibold">First 50 get early access before public release.</h3>
+          <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+            <div>
+              <label className="text-xs uppercase tracking-[0.3em] text-white/60">Email for instructions</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="army@founders.club"
+                className="mt-2 w-full rounded-2xl border border-white/20 bg-black/40 px-4 py-3 text-sm outline-none focus:border-white"
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-[0.3em] text-white/60">Where you rep Tampa from</label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="Ybor • International • Seoul"
+                className="mt-2 w-full rounded-2xl border border-white/20 bg-black/40 px-4 py-3 text-sm outline-none focus:border-white"
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-[0.3em] text-white/60">Commitment</label>
+              <select
+                value={commitment}
+                onChange={(e) => setCommitment(e.target.value)}
+                className="mt-2 w-full rounded-2xl border border-white/20 bg-black/40 px-4 py-3 text-sm outline-none focus:border-white"
+              >
+                <option value="Yes, I’m ready to reserve">Yes, I’m ready to reserve</option>
+                <option value="Need details before committing">Need details before committing</option>
+                <option value="Just watching for now">Just watching for now</option>
+              </select>
+            </div>
+            <button
+              type="submit"
+              className="w-full rounded-2xl bg-white px-5 py-4 text-sm font-semibold tracking-wide text-black transition hover:opacity-80"
+            >
+              Join List
+            </button>
+            <p className="text-xs text-white/50">
+              Pricing is revealed privately after signup. Proof-of-payment goes to {PAYMENT_EMAIL}. First 50 get notified ahead of public release.
+            </p>
+          </form>
+        </div>
+      </section>
+
+      <FooterSection isAudioOn={isAudioOn} toggleAudio={() => setIsAudioOn((prev) => !prev)} />
+
+      {storyOpen && <StoryModal onClose={() => setStoryOpen(false)} />}
+    </main>
+  );
+}
+
+function getCountdown() {
+  const diff = Math.max(0, COUNTDOWN_TARGET.getTime() - Date.now());
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+  return { days, hours, minutes, seconds };
+}
+
+function GradientHero({ countdownLabel, claimed, onStory }: { countdownLabel: string; claimed: number; onStory: () => void }) {
+  return (
+    <section className="relative isolate overflow-hidden px-6 pt-24 pb-20">
+      <div className="absolute inset-0">
+        <div
+          className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-purple-600/40 via-indigo-400/40 to-pink-500/40 blur-3xl"
+          style={{ animation: 'pulseGradient 18s ease-in-out infinite' }}
+        />
+      </div>
+
+      <div className="relative mx-auto max-w-4xl text-center">
+        <p className="text-sm uppercase tracking-[0.5em] text-white/60">TAMPA ARMY — FOUNDERS DROP</p>
+        <h1 className="mt-4 text-4xl font-semibold leading-tight md:text-5xl">Limited first batch for Tampa ARMY fans.</h1>
+        <p className="mt-3 text-lg text-white/80">Not mass produced. Not restocked. Built for the city that shows up early.</p>
+
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <a
+            href="#founders-form"
+            className="inline-flex items-center rounded-full bg-white px-8 py-3 text-sm font-semibold tracking-wide text-black transition hover:opacity-80"
+          >
+            Get Early Access
+          </a>
+          <button
+            className="inline-flex items-center rounded-full border border-white/30 px-8 py-3 text-sm font-medium tracking-wide text-white transition hover:border-white"
+            onClick={onStory}
+          >
+            Read the Story
+          </button>
+        </div>
+
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-4 text-sm text-white/70">
+          <div className="rounded-full border border-white/20 px-4 py-2">Preorder window closes in {countdownLabel}</div>
+          <div className="rounded-full border border-white/20 px-4 py-2">{claimed}+ ARMY on list · 80% claimed</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FooterSection({ isAudioOn, toggleAudio }: { isAudioOn: boolean; toggleAudio: () => void }) {
+  return (
+    <footer className="mx-auto mt-24 flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-12 text-xs text-white/60">
+      <div>
+        <p className="text-white">Tampa Army</p>
+        <p>Indie fan lab · Est. 2025</p>
+      </div>
+      <div className="flex flex-wrap items-center gap-4">
+        <a href="mailto:hello@tampaarmy.com" className="hover:text-white">
+          Contact
+        </a>
+        <a href="/terms" className="hover:text-white">
+          Terms
+        </a>
+        <a href="/privacy" className="hover:text-white">
+          Privacy
+        </a>
+        <button onClick={toggleAudio} className="rounded-full border border-white/20 px-4 py-2 text-white hover:border-white">
+          {isAudioOn ? 'Mute ambience' : 'Play ambience'}
+        </button>
+      </div>
+    </footer>
+  );
+}
+
+function StoryModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 px-4">
+    {/* ...tappable modal content with short narrative... */}
+      <div className="max-w-lg rounded-3xl border border-white/10 bg-[#0b0b0b] p-8 text-white">
+        <h4 className="text-lg font-semibold">Drop Narrative</h4>
+        <p className="mt-4 text-sm text-white/70">
+          This first run was stitched with our small atelier partners after weeks of fit testing in Tampa heat and late-night rehearsals. Every piece ships with a founders credential so we know who was
+          here on day zero.
+        </p>
+        <button onClick={onClose} className="mt-6 w-full rounded-2xl border border-white/30 px-4 py-3 text-sm font-semibold text-white hover:border-white">
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+Key points:
+- Hero CTA scrolls to the founders form.
+- Product preview uses your original mockups and descriptive copy, with prices hidden.
+- “Why” section keeps the voice human.
+- “Founders benefits” lists the four bullet perks.
+- Email form collects email/location/commitment, logs signups to Telegram, and mentions that pricing is shared privately.
+- Footer lets you toggle the ambient track and includes contact links.o
+
+Make sure youor assets exist (images in `public/images`, audio in `public/audio` if you want the ambience toggle). If you still need the `/api/telegram` route code for logging events, let me know and I’ll drop it in.
