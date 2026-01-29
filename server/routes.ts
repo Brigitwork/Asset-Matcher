@@ -20,6 +20,7 @@ export async function registerRoutes(
       const chatId = process.env.TELEGRAM_CHAT_ID;
 
       if (token && chatId) {
+        console.log(`Attempting to send Telegram message to chat ${chatId}`);
         const message = `
 🚀 *New Founder Signup*
 Event: ${input.event}
@@ -29,7 +30,9 @@ Commitment: ${input.payload.commitment || 'N/A'}
         `.trim();
 
         try {
-          const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          const url = `https://api.telegram.org/bot${token}/sendMessage`;
+          console.log(`Calling Telegram API: ${url}`);
+          const tgRes = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -39,15 +42,17 @@ Commitment: ${input.payload.commitment || 'N/A'}
             }),
           });
           
+          const responseText = await tgRes.text();
           if (!tgRes.ok) {
-             console.error("Telegram API error:", await tgRes.text());
+             console.error("Telegram API error:", responseText);
+          } else {
+             console.log("Telegram message sent successfully:", responseText);
           }
         } catch (tgError) {
-          console.error("Telegram send failed:", tgError);
-          // Don't fail the request if notification fails, data is safe in DB
+          console.error("Telegram send failed (network/fetch error):", tgError);
         }
       } else {
-        console.log("Telegram not configured. Signup saved:", input);
+        console.log("Telegram credentials missing. BOT_TOKEN exists:", !!token, "CHAT_ID exists:", !!chatId);
       }
 
       res.status(200).json({ success: true, message: "Signup recorded" });
