@@ -19,8 +19,9 @@ export async function registerRoutes(
       const token = process.env.TELEGRAM_BOT_TOKEN;
       const chatId = process.env.TELEGRAM_CHAT_ID;
 
+      console.log(`[TELEGRAM DEBUG] Checking config. Token: ${token ? 'SET' : 'MISSING'}, ChatID: ${chatId ? chatId : 'MISSING'}`);
+
       if (token && chatId) {
-        console.log(`Attempting to send Telegram message to chat ${chatId}`);
         const message = `
 🚀 *New Founder Signup*
 Event: ${input.event}
@@ -31,8 +32,8 @@ Commitment: ${input.payload.commitment || 'N/A'}
 
         try {
           const url = `https://api.telegram.org/bot${token}/sendMessage`;
-          console.log(`Calling Telegram API: ${url}`);
-          const tgRes = await fetch(url, {
+          console.log(`[TELEGRAM DEBUG] Sending to: ${url}`);
+          const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -42,17 +43,17 @@ Commitment: ${input.payload.commitment || 'N/A'}
             }),
           });
           
-          const responseText = await tgRes.text();
-          if (!tgRes.ok) {
-             console.error("Telegram API error:", responseText);
+          const result = await response.json();
+          if (!response.ok) {
+            console.error("[TELEGRAM ERROR RESPONSE]", JSON.stringify(result));
           } else {
-             console.log("Telegram message sent successfully:", responseText);
+            console.log("[TELEGRAM SUCCESS RESPONSE]", JSON.stringify(result));
           }
-        } catch (tgError) {
-          console.error("Telegram send failed (network/fetch error):", tgError);
+        } catch (error) {
+          console.error("[TELEGRAM FETCH EXCEPTION]", error);
         }
       } else {
-        console.log("Telegram credentials missing. BOT_TOKEN exists:", !!token, "CHAT_ID exists:", !!chatId);
+        console.warn("[TELEGRAM CONFIG MISSING] Notifications skipped.");
       }
 
       res.status(200).json({ success: true, message: "Signup recorded" });
