@@ -304,10 +304,11 @@ export default function PremiumDropPage() {
             <p className="text-sm uppercase tracking-[0.4em] text-white/50 font-semibold font-display">Join founders list</p>
             <h3 className="mt-4 text-3xl font-bold tracking-tight font-display text-white">First 50 get early access before public release.</h3>
             
-            <form className="mt-10 space-y-6" onSubmit={handleSubmit}>
+            <form id="signupForm" className="mt-10 space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <label className="text-xs uppercase tracking-[0.3em] text-white/50 font-bold ml-1">Email for instructions</label>
                 <input
+                  id="email"
                   type="email"
                   required
                   value={email}
