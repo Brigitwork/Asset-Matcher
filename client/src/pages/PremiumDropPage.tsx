@@ -42,8 +42,38 @@ const PRODUCTS: Product[] = [
       }
     }
   },
+];
+
+const LIGHTWEIGHT_HOODIES: Product[] = [
   {
-    id: 'hoodie',
+    id: 'hoodie-light',
+    title: 'Summer Hoodie',
+    tag: 'Lightweight • Florida heat ready',
+    blurb: 'Short-sleeve cut, breathable weave. Built for humid arenas and parking lot meetups.',
+    images: {
+      black: {
+        front: '/images/products/hoodie-black-front.jpg',
+        back: '/images/products/hoodie-black-back.jpg'
+      },
+      blue: {
+        front: '/images/products/hoodie-blue-front.jpg',
+        back: '/images/products/hoodie-blue-back.jpg'
+      },
+      purple: {
+        front: '/images/products/hoodie-purple-front.jpg',
+        back: '/images/products/hoodie-purple-back.jpg'
+      },
+      white: {
+        front: '/images/products/hoodie-white-front.jpg',
+        back: '/images/products/hoodie-white-back.jpg'
+      }
+    }
+  }
+];
+
+const HEAVYWEIGHT_PRODUCTS: Product[] = [
+  {
+    id: 'hoodie-heavy',
     title: 'Night Hoodie',
     tag: 'Heavyweight • Premium feel',
     blurb: 'Oversized drape, brushed fleece, hidden pocket stitch. After-show uniform.',
@@ -217,10 +247,22 @@ export default function PremiumDropPage() {
     <main className="min-h-screen overflow-hidden bg-[#040404] text-white selection:bg-pink-500/30 font-sans">
       <GradientHero countdownLabel={countdownLabel} claimed={claimed} onStory={() => setStoryOpen(true)} />
 
-      <section className="mx-auto mt-16 grid max-w-5xl gap-8 px-6 md:grid-cols-2">
-        {PRODUCTS.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+      <section className="mx-auto mt-16 px-6 max-w-5xl">
+        <p className="text-sm uppercase tracking-[0.4em] text-white/50 mb-8 font-semibold font-display">Lightweight Series</p>
+        <div className="grid gap-8 md:grid-cols-2">
+          {PRODUCTS.concat(LIGHTWEIGHT_HOODIES).map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto mt-24 px-6 max-w-5xl">
+        <p className="text-sm uppercase tracking-[0.4em] text-white/50 mb-8 font-semibold font-display">After-Show Series</p>
+        <div className="grid gap-8 md:grid-cols-2">
+          {HEAVYWEIGHT_PRODUCTS.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
       </section>
 
       <section className="mx-auto mt-24 max-w-3xl px-6 text-white/80">
