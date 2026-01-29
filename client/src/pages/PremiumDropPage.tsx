@@ -5,12 +5,15 @@ import { Volume2, VolumeX, X, Check } from 'lucide-react';
 
 const PAYMENT_EMAIL = 'support@brigit.work';
 
+type Color = 'black' | 'blue' | 'purple' | 'white';
+type View = 'front' | 'back';
+
 type Product = {
   id: string;
   title: string;
   tag: string;
   blurb: string;
-  image: string;
+  images: Record<Color, Record<View, string>>;
 };
 
 const PRODUCTS: Product[] = [
@@ -19,18 +22,111 @@ const PRODUCTS: Product[] = [
     title: 'Concert Tee',
     tag: 'Lightweight • Florida heat ready',
     blurb: 'Breathable weave, matte finish, minimal branding. Built for humid arenas.',
-    image: '/images/products/tee-black-front.jpg',
+    images: {
+      black: {
+        front: '/images/products/tee-black-front.jpg',
+        back: '/images/products/tee-black-back.jpg'
+      },
+      blue: {
+        front: '/images/products/tee-blue-front.jpg',
+        back: '/images/products/tee-blue-back.jpg'
+      },
+      purple: {
+        front: '/images/products/tee-purple-front.jpg',
+        back: '/images/products/tee-purple-back.jpg'
+      },
+      white: {
+        front: '/images/products/tee-white-front.jpg',
+        back: '/images/products/tee-white-back.jpg'
+      }
+    }
   },
   {
     id: 'hoodie',
     title: 'Night Hoodie',
     tag: 'Heavyweight • Premium feel',
     blurb: 'Oversized drape, brushed fleece, hidden pocket stitch. After-show uniform.',
-    image: '/images/products/hoodie-black-front.jpg',
+    images: {
+      black: {
+        front: '/images/products/hoodie-black-front.jpg',
+        back: '/images/products/hoodie-black-back.jpg'
+      },
+      blue: {
+        front: '/images/products/hoodie-blue-front.jpg',
+        back: '/images/products/hoodie-blue-back.jpg'
+      },
+      purple: {
+        front: '/images/products/hoodie-purple-front.jpg',
+        back: '/images/products/hoodie-purple-back.jpg'
+      },
+      white: {
+        front: '/images/products/hoodie-white-front.jpg',
+        back: '/images/products/hoodie-white-back.jpg'
+      }
+    }
   },
 ];
 
-const COUNTDOWN_TARGET = new Date('2026-02-14T23:59:59Z');
+function ProductCard({ product }: { product: Product }) {
+  const [selectedColor, setSelectedColor] = useState<Color>('black');
+  const [selectedView, setSelectedView] = useState<View>('front');
+
+  const colors: { name: Color; class: string }[] = [
+    { name: 'black', class: 'bg-[#1a1a1a]' },
+    { name: 'white', class: 'bg-[#f5f5f5]' },
+    { name: 'blue', class: 'bg-[#7ba4cc]' },
+    { name: 'purple', class: 'bg-[#5e3a8c]' },
+  ];
+
+  return (
+    <article className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:border-white/30 hover:bg-white/10">
+      <div className="relative overflow-hidden rounded-2xl bg-black/40 aspect-[4/5] md:aspect-square">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10 opacity-60" />
+        <img
+          src={product.images[selectedColor][selectedView]}
+          alt={`${product.title} - ${selectedColor} ${selectedView}`}
+          className="h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105 group-hover:opacity-100"
+        />
+        
+        {/* View Toggle */}
+        <div className="absolute top-4 right-4 z-20 flex gap-2">
+          <button 
+            onClick={() => setSelectedView('front')}
+            className={`px-3 py-1 rounded-full text-[10px] uppercase tracking-wider transition ${selectedView === 'front' ? 'bg-white text-black' : 'bg-black/40 text-white/60 hover:bg-black/60'}`}
+          >
+            Front
+          </button>
+          <button 
+            onClick={() => setSelectedView('back')}
+            className={`px-3 py-1 rounded-full text-[10px] uppercase tracking-wider transition ${selectedView === 'back' ? 'bg-white text-black' : 'bg-black/40 text-white/60 hover:bg-black/60'}`}
+          >
+            Back
+          </button>
+        </div>
+
+        <div className="absolute inset-x-6 bottom-6 z-20 flex items-end justify-between">
+          <div className="text-xs uppercase tracking-[0.4em] text-white/90 font-bold font-display">{product.title}</div>
+          
+          {/* Color Selector */}
+          <div className="flex gap-2">
+            {colors.map((c) => (
+              <button
+                key={c.name}
+                onClick={() => setSelectedColor(c.name)}
+                className={`w-5 h-5 rounded-full border-2 transition-transform hover:scale-110 ${c.class} ${selectedColor === c.name ? 'border-pink-500 scale-110' : 'border-white/20'}`}
+                title={c.name}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="mt-6 space-y-3">
+        <p className="text-sm text-pink-200/80 font-medium tracking-wide">{product.tag}</p>
+        <p className="text-sm text-white/60 leading-relaxed font-light">{product.blurb}</p>
+      </div>
+    </article>
+  );
+}
 
 export default function PremiumDropPage() {
   const [claimed, setClaimed] = useState(241);
@@ -47,8 +143,6 @@ export default function PremiumDropPage() {
 
   const recordEvent = useCallback(async (event: string, payload: Record<string, unknown>) => {
     try {
-      // Cast payload to match the stricter schema if needed, but for now we pass as is 
-      // since the hook expects specific fields. We construct valid payload below.
       await submitMutation.mutateAsync({ 
         event, 
         payload: {
@@ -74,7 +168,6 @@ export default function PremiumDropPage() {
 
   useEffect(() => {
     if (!ambientAudio) {
-      // Placeholder audio logic - in a real app ensure this file exists
       const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/24/audio_c8b846505a.mp3?filename=ambient-piano-12502.mp3'); 
       audio.loop = true;
       audio.volume = 0.25;
@@ -123,22 +216,7 @@ export default function PremiumDropPage() {
 
       <section className="mx-auto mt-16 grid max-w-5xl gap-8 px-6 md:grid-cols-2">
         {PRODUCTS.map((product) => (
-          <article key={product.id} className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:border-white/30 hover:bg-white/10">
-            <div className="relative overflow-hidden rounded-2xl bg-black/40 aspect-[4/5] md:aspect-square">
-              {/* Product Image */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10 opacity-60" />
-              <img
-                src={product.image}
-                alt={product.title}
-                className="h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105 group-hover:opacity-100"
-              />
-              <div className="absolute inset-x-6 bottom-6 z-20 text-xs uppercase tracking-[0.4em] text-white/90 font-bold font-display">{product.title}</div>
-            </div>
-            <div className="mt-6 space-y-3">
-              <p className="text-sm text-pink-200/80 font-medium tracking-wide">{product.tag}</p>
-              <p className="text-sm text-white/60 leading-relaxed font-light">{product.blurb}</p>
-            </div>
-          </article>
+          <ProductCard key={product.id} product={product} />
         ))}
       </section>
 
