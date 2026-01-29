@@ -67,6 +67,8 @@ const PRODUCTS: Product[] = [
   },
 ];
 
+const COUNTDOWN_TARGET = new Date('2026-02-14T23:59:59Z');
+
 function ProductCard({ product }: { product: Product }) {
   const [selectedColor, setSelectedColor] = useState<Color>('black');
   const [selectedView, setSelectedView] = useState<View>('front');
