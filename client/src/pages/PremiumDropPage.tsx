@@ -19,15 +19,14 @@ const PRODUCTS: Product[] = [
     title: 'Concert Tee',
     tag: 'Lightweight • Florida heat ready',
     blurb: 'Breathable weave, matte finish, minimal branding. Built for humid arenas.',
-    // Using unspash images as placeholders for the mockups
-    image: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800&q=80', 
+    image: '/images/products/tee-black-front.jpg',
   },
   {
     id: 'hoodie',
     title: 'Night Hoodie',
     tag: 'Heavyweight • Premium feel',
     blurb: 'Oversized drape, brushed fleece, hidden pocket stitch. After-show uniform.',
-    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80',
+    image: '/images/products/hoodie-black-front.jpg',
   },
 ];
 
