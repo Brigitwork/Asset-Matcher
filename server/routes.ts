@@ -12,8 +12,12 @@ export async function registerRoutes(
     try {
       const input = api.telegram.submit.input.parse(req.body);
 
-      // Save to DB
-      await storage.createSignup(input);
+      // Save to DB (if configured)
+      try {
+        await storage.createSignup(input);
+      } catch (dbError) {
+        console.log("Database not configured, skipping DB save. Continuing with Telegram...");
+      }
 
       // Send to Telegram if configured
       const token = process.env.TELEGRAM_BOT_TOKEN;
