@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link } from 'wouter';
 import { useSubmitTelegram } from '@/hooks/use-telegram';
 import { useToast } from '@/hooks/use-toast';
 import { Volume2, VolumeX, X, Check } from 'lucide-react';
@@ -398,9 +399,9 @@ function FooterSection({ isAudioOn, toggleAudio }: { isAudioOn: boolean; toggleA
         <p>Indie fan lab · Est. 2025</p>
       </div>
       <div className="flex flex-wrap items-center gap-6">
-        <a href="mailto:hello@tampaarmy.com" className="hover:text-white transition decoration-transparent underline-offset-4 hover:underline">Contact</a>
+        <a href="mailto:support@brigit.work" className="hover:text-white transition decoration-transparent underline-offset-4 hover:underline">Contact</a>
         <a href="#" className="hover:text-white transition decoration-transparent underline-offset-4 hover:underline">Terms</a>
-        <a href="#" className="hover:text-white transition decoration-transparent underline-offset-4 hover:underline">Privacy</a>
+        <Link href="/privacy" className="hover:text-white transition decoration-transparent underline-offset-4 hover:underline">Privacy</Link>
         <button
           onClick={toggleAudio}
           className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white/70 hover:border-white/30 hover:bg-white/10 hover:text-white transition group"

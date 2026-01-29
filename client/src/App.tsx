@@ -6,11 +6,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import PremiumDropPage from "@/pages/PremiumDropPage";
 import NotFound from "@/pages/not-found";
 
+import Privacy from "@/pages/Privacy";
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={PremiumDropPage} />
       <Route path="/premium-drop" component={PremiumDropPage} />
+      <Route path="/privacy" component={Privacy} />
       <Route component={NotFound} />
     </Switch>
   );
